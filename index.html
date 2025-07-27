@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> اسعار الصرف في حضرموت</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1, h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .item-display {
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            text-align: right;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .item-display strong {
+            flex-basis: 40%;
+            text-align: right;
+        }
+        .item-display span {
+            flex-basis: 55%;
+            text-align: left;
+            font-weight: normal;
+        }
+        .no-data {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        div p {
+            text-align: center;
+            font-weight: bolder;
+            font-size: 110%;
+            background-color: #fff307;
+            padding: 20px;
+            width: 50%;
+            border-radius: 10px;
+            text-shadow: 0 0 10px rgb(203, 255, 245);
+            margin: 5px auto;
+        }
+        #update-time {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div id="update-time">تم التحديث في: جاري التحميل...</div>
+
+        <h1>أسعار الصرف في حضرموت</h1>
+        <div id="exchange-rates-display"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const exchangeRatesDisplay = document.getElementById('exchange-rates-display');
+
+            let hasExchangeRates = false;
+
+            const exchangeSaudi = urlParams.get('exchange_saudi');
+            const exchangeUsd = urlParams.get('exchange_usd');
+            const exchangeOman = urlParams.get('exchange_oman');
+            const exchangeEgypt = urlParams.get('exchange_egypt');
+            const exchangeKuwait = urlParams.get('exchange_kuwait');
+            const exchangeBahrain = urlParams.get('exchange_bahrain');
+            const exchangeQatar = urlParams.get('exchange_qatar');
+
+            if (exchangeSaudi) {
+                exchangeRatesDisplay.innerHTML += `
+                    <div class="item-display">
+                        <strong>ريال سعودي <img src="https://flagcdn.com/160x120/sa.png" style="width: 25px;"></strong>
+                        <span>${exchangeSaudi} ريال يمني</span>
+                    </div>`;
+                hasExchangeRates = true;
+            }
+            if (exchangeUsd) {
+                exchangeRatesDisplay.innerHTML += `
+                    <div class="item-display">
+                        <strong>دولار أمريكي <img src="https://flagcdn.com/160x120/us.png" style="width: 25px;"></strong>
+                        <span>${exchangeUsd} ريال يمني</span>
+                    </div>`;
+                hasExchangeRates = true;
+            }
+            if (exchangeOman) {
+                exchangeRatesDisplay.innerHTML += `
+                    <div class="item-display">
+                        <strong>ريال عماني <img src="https://flagcdn.com/160x120/om.png" style="width: 25px;"></strong>
+                        <span>${exchangeOman} ريال يمني</span>
+                    </div>`;
+                hasExchangeRates = true;
+            }
+            if (exchangeEgypt) {
+                exchangeRatesDisplay.innerHTML += `
+                    <div class="item-display">
+                        <strong>جنيه مصري <img src="https://flagcdn.com/160x120/eg.png" style="width: 25px;"></strong>
+                        <span>${exchangeEgypt} ريال يمني</span>
+                    </div>`;
+                hasExchangeRates = true;
+            }
+            if (exchangeKuwait) {
+                exchangeRatesDisplay.innerHTML += `
+                    <div class="item-display">
+                        <strong>دينار كويتي <img src="https://flagcdn.com/160x120/kw.png" style="width: 25px;"></strong>
+                        <span>${exchangeKuwait} ريال يمني</span>
+                    </div>`;
+                hasExchangeRates = true;
+            }
+            if (exchangeBahrain) {
+                exchangeRatesDisplay.innerHTML += `
+                    <div class="item-display">
+                        <strong>دينار بحريني <img src="https://flagcdn.com/160x120/bh.png" style="width: 25px;"></strong>
+                        <span>${exchangeBahrain} ريال يمني</span>
+                    </div>`;
+                hasExchangeRates = true;
+            }
+            if (exchangeQatar) {
+                exchangeRatesDisplay.innerHTML += `
+                    <div class="item-display">
+                        <strong>ريال قطري <img src="https://flagcdn.com/160x120/qa.png" style="width: 25px;"></strong>
+                        <span>${exchangeQatar} ريال يمني</span>
+                    </div>`;
+                hasExchangeRates = true;
+            }
+
+            if (!hasExchangeRates) {
+                exchangeRatesDisplay.innerHTML = `
+                    <p class="no-data">لم يتم تمرير أي أسعار للصرف.</p>`;
+            }
+
+            // تحديث وقت العرض
+            const updateTimeDiv = document.getElementById('update-time');
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            updateTimeDiv.textContent = 'تم التحديث في: ' + now.toLocaleString('EG', options);
+        });
+    </script>
+
+    <div>
+        <p>تنويه: أسعار الصرف المعروضة في الموقع قابلة للتغيير وتعتمد على الأسواق المالية لحظة التحديث</p>
+    </div>
+</body>
+</html>
