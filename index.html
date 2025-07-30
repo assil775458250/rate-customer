@@ -2,91 +2,55 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>أسعار الصرف في حضرموت</title>
+  <title>أسعار الصرف</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f9f9f9;
-      color: #333;
+      padding: 20px;
+      background: #f9f9f9;
     }
-
     .container {
       max-width: 600px;
-      margin: 0 auto;
+      margin: auto;
+      background: #fff;
       padding: 20px;
-      background-color: #fff;
       border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
+      box-shadow: 0 0 10px #ccc;
     }
-
-    h1 {
-      color: #007bff;
-      margin-bottom: 20px;
-    }
-
     .item-display {
-      background-color: #e9ecef;
-      border: 1px solid #ced4da;
+      background: #e9ecef;
       border-radius: 5px;
-      padding: 10px;
-      margin-bottom: 15px;
-      font-size: 1.2em;
+      padding: 15px;
+      margin-bottom: 10px;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
+      font-size: 1.1em;
     }
-
-    .item-display strong {
-      flex-basis: 40%;
-      text-align: right;
-    }
-
     .item-display span {
-      flex-basis: 55%;
-      text-align: left;
-      font-weight: normal;
+      margin: 0 10px;
     }
-
-    .no-data {
-      color: #dc3545;
-      font-weight: bold;
-    }
-
-    div p {
-      text-align: center;
-      font-weight: bolder;
-      font-size: 70%;
-      background-color: #fff307;
-      padding: 20px;
-      width: 90%;
-      border-radius: 10px;
-      text-shadow: 0 0 10px rgb(203, 255, 245);
-      margin: 5px auto;
-    }
-
     #update-time {
-      background-color: #fff3cd;
-      color: #856404;
-      padding: 10px;
-      border: 1px solid #ffeeba;
-      border-radius: 5px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       font-weight: bold;
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ffeeba;
+      text-align: center;
+    }
+    h1
+    {
+        text-align: center;
     }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <div id="update-time">تم التحديث في: جاري التحميل...</div>
+    <div id="update-time">جاري التحميل...</div>
     <h1>أسعار الصرف في حضرموت</h1>
     <div id="exchange-rates-display"></div>
-  </div>
-
-  <div>
-    <p>تنويه: أسعار الصرف المعروضة في الموقع قابلة للتغيير وتعتمد على الأسواق المالية لحظة التحديث</p>
   </div>
 
   <script type="module">
@@ -105,55 +69,49 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const ratesRef = ref(db, 'rates/');
 
-    const display = document.getElementById('exchange-rates-display');
+    const exchangeRatesDisplay = document.getElementById('exchange-rates-display');
     const updateTimeDiv = document.getElementById('update-time');
 
-    const ratesRef = ref(db, 'rates/');
+    const currencyNames = {
+      sar: "ريال سعودي 🇸🇦",
+      usd: "دولار أمريكي 🇺🇸",
+      omr: "ريال عماني 🇴🇲",
+      egp: "جنيه مصري 🇪🇬",
+      kwd: "دينار كويتي 🇰🇼",
+      bhd: "دينار بحريني 🇧🇭",
+      qar: "ريال قطري 🇶🇦"
+    };
+
     onValue(ratesRef, (snapshot) => {
       const data = snapshot.val();
+      exchangeRatesDisplay.innerHTML = '';
 
-      if (data) {
-        display.innerHTML = ''; // تفريغ المحتوى السابق
-
-        // خريطة الأسماء العربية
-        const currencyNames = {
-          sar: "ريال سعودي",
-          usd: "دولار أمريكي",
-          omr: "ريال عماني",
-          egp: "جنيه مصري",
-          kwd: "دينار كويتي",
-          bhd: "دينار بحريني",
-          qar: "ريال قطري"
-        };
-
-        for (const key in currencyNames) {
-          if (data[key]) {
-            display.innerHTML += `
-              <div class="item-display">
-                <strong>${currencyNames[key]}</strong>
-                <span>${data[key]} ريال يمني</span>
-              </div>
-            `;
-          }
-        }
-
-        // عرض وقت التحديث إن وجد
-        if (data.updatedAt) {
-          const updatedDate = new Date(data.updatedAt);
-          updateTimeDiv.textContent = 'تم التحديث في: ' + updatedDate.toLocaleString('ar-EG', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit',
-            hour12: true
-          });
-        } else {
-          updateTimeDiv.textContent = 'تم التحديث في: غير متوفر';
-        }
-
-      } else {
-        display.innerHTML = '<p class="no-data">لا توجد بيانات متاحة حاليًا.</p>';
+      if (!data) {
+        exchangeRatesDisplay.innerHTML = '<p>لا توجد بيانات حالياً.</p>';
+        return;
       }
+
+      for (const [key, value] of Object.entries(data)) {
+        if (key === 'updatedAt') continue;
+        exchangeRatesDisplay.innerHTML += `
+          <div class="item-display">
+            <strong>${currencyNames[key] || key}</strong>
+            <span>شراء: ${value.buy}</span>
+            <span>بيع: ${value.sell}</span>
+          </div>
+        `;
+      }
+
+      const updatedAt = new Date(data.updatedAt || Date.now());
+      updateTimeDiv.textContent = 'تم التحديث في: ' + updatedAt.toLocaleString('ar-EG', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: true
+      });
     });
   </script>
+
 </body>
 </html>
