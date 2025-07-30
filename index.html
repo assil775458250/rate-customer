@@ -10,25 +10,32 @@
       background: #f9f9f9;
     }
     .container {
-      max-width: 600px;
+      width: 85%;
       margin: auto;
       background: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px #ccc;
     }
+
     .item-display {
-      background: #e9ecef;
+      background: #e5f2ff;
+      border-left: 10px solid rgb(39, 39, 181);
       border-radius: 5px;
       padding: 15px;
       margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      text-align: center;
       font-size: 1.1em;
+      box-shadow: 5px 3px 5px rgba(21, 21, 27, 0.956);
+      
     }
+
     .item-display span {
       margin: 0 10px;
+      font-size: 130%;
+      font-weight: 700;
+     
+
     }
     #update-time {
       margin-bottom: 20px;
@@ -39,19 +46,48 @@
       border: 1px solid #ffeeba;
       text-align: center;
     }
-    h1
+    h1 {
+      text-align: center;
+      color: blue;
+      padding: 50px;
+      background-color: #daffa1;
+      border: 3px solid black;
+      border-radius: 50px;
+    }
+    #buy
     {
-        text-align: center;
+        color: rgb(31, 203, 4);
+        text-shadow: 0 0 10 white;
+        background-color: rgb(255, 255, 255);
+        padding: 10px;
+        border-radius: 20px;
+    }
+    #sell
+    {
+        color: rgb(220, 28, 28);
+         text-shadow: 0 0 10 white;
+         background-color: rgb(255, 255, 255);
+        padding: 10px;
+        border-radius: 20px;
+    }
+    #rate
+    {
+        display: flex;
+        justify-content: space-around;
+         
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div id="update-time">جاري التحميل...</div>
-    <h1>أسعار الصرف في حضرموت</h1>
+    <div id="update-time">جاري التحميل ...</div>
+    <h1>أسعار الصرف في حضرموت و عدن</h1>
     <div id="exchange-rates-display"></div>
   </div>
+
+  <!-- صوت إشعار -->
+  <audio id="ding-sound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_91f1be2b87.mp3" preload="auto"></audio>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
@@ -73,39 +109,59 @@
 
     const exchangeRatesDisplay = document.getElementById('exchange-rates-display');
     const updateTimeDiv = document.getElementById('update-time');
+    const dingSound = document.getElementById('ding-sound');
 
+
+  
+    // <img src="https://flagcdn.com/160x120/sa.png"  style="width: 25px; height: auto;">
     const currencyNames = {
-      sar: "ريال سعودي 🇸🇦",
-      usd: "دولار أمريكي 🇺🇸",
-      omr: "ريال عماني 🇴🇲",
-      egp: "جنيه مصري 🇪🇬",
-      kwd: "دينار كويتي 🇰🇼",
-      bhd: "دينار بحريني 🇧🇭",
-      qar: "ريال قطري 🇶🇦"
+      sar: "ريال سعودي "+"<img src='https://flagcdn.com/160x120/sa.png'  style='width: 35px; height: auto;'> ",
+      usd: "دولار أمريكي "+"<img src='https://flagcdn.com/160x120/us.png'  style='width: 35px; height: auto;'>",
+      omr: "ريال عماني "+"<img src='https://flagcdn.com/160x120/om.png' style='width: 35px; height: auto;'>",
+      egp: "جنيه مصري "+"<img src='https://flagcdn.com/160x120/eg.png' style='width: 35px; height: auto;'>",
+      kwd: "دينار كويتي "+"<img src='https://flagcdn.com/160x120/kw.png'style='width: 35px; height: auto;'>",
+      bhd: "دينار بحريني "+"<img src='https://flagcdn.com/160x120/bh.png' style='width: 35px; height: auto;'>",
+      qar: "ريال قطري "+"<img src='https://flagcdn.com/160x120/qa.png' style='width: 40px; height: auto;'>"
     };
+
+    let lastData = null;
 
     onValue(ratesRef, (snapshot) => {
       const data = snapshot.val();
-      exchangeRatesDisplay.innerHTML = '';
 
       if (!data) {
         exchangeRatesDisplay.innerHTML = '<p>لا توجد بيانات حالياً.</p>';
         return;
       }
 
-      for (const [key, value] of Object.entries(data)) {
-        if (key === 'updatedAt') continue;
+      // قارن البيانات لتجنب تشغيل الصوت كل مرة بلا سبب
+      const newDataString = JSON.stringify(data);
+      if (newDataString !== JSON.stringify(lastData)) {
+        dingSound.play();
+        lastData = data;
+      }
+
+      exchangeRatesDisplay.innerHTML = '';
+
+      // ترتيب العملات حسب ترتيب الكائن currencyNames
+      for (const key of Object.keys(currencyNames)) {
+        const value = data[key];
+        if (!value) continue;
+
         exchangeRatesDisplay.innerHTML += `
           <div class="item-display">
-            <strong>${currencyNames[key] || key}</strong>
-            <span>شراء: ${value.buy}</span>
-            <span>بيع: ${value.sell}</span>
+            <h2>${currencyNames[key]}</h2>
+            <hr>
+            <div id='rate'>
+            <span id='buy'>شراء: ${value.buy}</span>
+            <span id='sell'>بيع: ${value.sell}</span>
+            </div>
           </div>
         `;
       }
 
       const updatedAt = new Date(data.updatedAt || Date.now());
-      updateTimeDiv.textContent = 'تم التحديث في: ' + updatedAt.toLocaleString('ar-EG', {
+      updateTimeDiv.textContent = '📅 تم التحديث في: ' + updatedAt.toLocaleString('ar-EG', {
         year: 'numeric', month: 'long', day: 'numeric',
         hour: '2-digit', minute: '2-digit', second: '2-digit',
         hour12: true
